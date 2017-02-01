@@ -69,10 +69,11 @@ public class Asteroids {
 			angle-=5;
 		}
 		if (pressedkeys[1]==1){
-			shipdx+=0.05*Math.sin(angle * Math.PI / 180);
-			shipdy+=0.05*Math.cos(angle * Math.PI / 180);
+			shipdx+=0.08*Math.sin(angle * Math.PI / 180);
+			shipdy+=0.08*Math.cos(angle * Math.PI / 180);
 		}
 		if (pressedkeys[2]==1&&!bullet){
+			bulletangle=angle;
 			bulletx=shipx;
 			bullety=shipy;
 			bullet=true;
@@ -84,10 +85,10 @@ public class Asteroids {
 		//grap.fillRect(5,5,985,955);
 		shipx+=shipdx;
 		shipy+=shipdy;
-		/*
+		
 		shipdx-=shipdx/100;
 		shipdy-=shipdy/100;
-*/
+
 		if (shipx<5){
 			shipx=990;
 		}
@@ -112,15 +113,14 @@ public class Asteroids {
 				pressedkeys[0]=1;
 			}
 			if (key.getKeyCode()==KeyEvent.VK_RIGHT){
-				pressedkeys[0] =2;
+				pressedkeys[0]=2;
 			}
 			if (key.getKeyCode()==KeyEvent.VK_UP){
 				pressedkeys[1] = 1;
 			}
-			/*if (key.getKeyCode()==KeyEvent.VK_SPACE&&!bullet){
+			if (key.getKeyCode()==KeyEvent.VK_SPACE&&!bullet){
 				pressedkeys[2] = 1;
-				bulletangle=angle;
-			}*/
+			}
 			System.out.println(Arrays.toString(pressedkeys));
 		}
 		public void keyReleased(KeyEvent key) {
@@ -159,7 +159,7 @@ public class Asteroids {
 			
 			grap.fillRect((int)bulletx, (int)bullety, 5, 5);
 			
-			if (bulletx<0||bulletx>960||bullety<0||bullety>990){
+			if (bulletx<-5||bulletx>995||bullety<-5||bullety>965){
 				bullet=false;
 			}
 			
