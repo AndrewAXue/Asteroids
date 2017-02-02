@@ -3,14 +3,18 @@ package Asteroids;
 //a3xue@edu.uwaterloo.ca
 // Game is NOT FINISHED. Movement was implement using individual x and y vector components.
 // Differential equations were used for speed deterioration. Use the left and right arrow keys to
-// rotate the ship and the up arrow to move the ship forwards.
+// rotate the ship and the up arrow to move the ship forwards. THIS IS NOW A FIREWORK MAKING GAME
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
@@ -18,6 +22,8 @@ import javax.swing.JFrame;
 public class Asteroids {
 	JFrame window = new JFrame("Asteroids");
 	asteroids startinggrid = new asteroids();
+	Color[] colors = {Color.RED,Color.GREEN,Color.BLUE,Color.WHITE,Color.ORANGE,Color.PINK,Color.MAGENTA,Color.CYAN,Color.YELLOW,Color.DARK_GRAY};
+	Random colorpicker = new Random();
 	
 	double shipx = 200;
 	double shipy = 200;
@@ -35,16 +41,14 @@ public class Asteroids {
 	double leftcornery;
 	double shiptipx;
 	double shiptipy;
-	
-	boolean bullet;
-	double bulletx;
-	double bullety;
-	double bulletangle;
+	double bulletspeed = 90;
 	
 	int angletoshipcorner=130;
 	
-	int[] pressedkeys =  new int[3];
+	int[] pressedkeys =  new int[4];
 	// {anglechange,accelerating,shooting}
+	
+	ArrayList<List<Double>> bullets = new ArrayList<List<Double>>();
 	
 	public static void main(String[] args) {
 		new Asteroids().go();
@@ -65,22 +69,19 @@ public class Asteroids {
 		if (pressedkeys[0]==1){
 			angle+=5;
 		}
-		if (pressedkeys[0]==2){
+		if (pressedkeys[1]==1){
 			angle-=5;
 		}
-		if (pressedkeys[1]==1){
+		if (pressedkeys[2]==1){
 			shipdx+=0.08*Math.sin(angle * Math.PI / 180);
 			shipdy+=0.08*Math.cos(angle * Math.PI / 180);
 		}
-		if (pressedkeys[2]==1&&!bullet){
-			bulletangle=angle;
-			bulletx=shipx;
-			bullety=shipy;
-			bullet=true;
+		if (pressedkeys[3]==1){
+			bullets.add(Arrays.asList(shipx,shipy,angle,(double)colorpicker.nextInt(10)));
 		}
-		if (bullet){
-			bulletx+=5*Math.sin(bulletangle * Math.PI / 180);
-			bullety+=5*Math.cos(bulletangle * Math.PI / 180);
+		for (int i=0;i<bullets.size();i++){
+			bullets.get(i).set(0,bullets.get(i).get(0)+bulletspeed*Math.sin(bullets.get(i).get(2))* Math.PI / 180);
+			bullets.get(i).set(1,bullets.get(i).get(1)+bulletspeed*Math.cos(bullets.get(i).get(2))* Math.PI / 180);
 		}
 		//grap.fillRect(5,5,985,955);
 		shipx+=shipdx;
@@ -113,27 +114,28 @@ public class Asteroids {
 				pressedkeys[0]=1;
 			}
 			if (key.getKeyCode()==KeyEvent.VK_RIGHT){
-				pressedkeys[0]=2;
+				pressedkeys[1]=1;
 			}
 			if (key.getKeyCode()==KeyEvent.VK_UP){
-				pressedkeys[1] = 1;
-			}
-			if (key.getKeyCode()==KeyEvent.VK_SPACE&&!bullet){
 				pressedkeys[2] = 1;
 			}
-			System.out.println(Arrays.toString(pressedkeys));
+			if (key.getKeyCode()==KeyEvent.VK_SPACE){
+				pressedkeys[3] = 1;
+			}
 		}
 		public void keyReleased(KeyEvent key) {
-			if (key.getKeyCode()==KeyEvent.VK_UP){
-				pressedkeys[1]=0;
-			}
-			if (key.getKeyCode()==KeyEvent.VK_SPACE){
-				pressedkeys[2]=0;
-			}
-			else{
+			if (key.getKeyCode()==KeyEvent.VK_LEFT){
 				pressedkeys[0]=0;
 			}
-			
+			if (key.getKeyCode()==KeyEvent.VK_RIGHT){
+				pressedkeys[1]=0;
+			}
+			if (key.getKeyCode()==KeyEvent.VK_UP){
+				pressedkeys[2]=0;
+			}
+			if (key.getKeyCode()==KeyEvent.VK_SPACE){
+				pressedkeys[3]=0;
+			}			
 		}
 		public void keyTyped(KeyEvent key) {}
 		
@@ -156,13 +158,11 @@ public class Asteroids {
 			
 			shiptipx = (shipx + 10 * Math.sin(angle * Math.PI / 180));
 			shiptipy = (shipy + 10 * Math.cos(angle * Math.PI / 180 ));
-			
-			grap.fillRect((int)bulletx, (int)bullety, 5, 5);
-			
-			if (bulletx<-5||bulletx>995||bullety<-5||bullety>965){
-				bullet=false;
+			for (int i=0;i<bullets.size();i++){
+				grap.setColor(colors[bullets.get(i).get(3).intValue()]);
+				grap.fillRect(bullets.get(i).get(0).intValue(), bullets.get(i).get(1).intValue(), 5, 5);
 			}
-			
+			grap.setColor(Color.WHITE);
 			grap.drawLine((int)shiptipx, (int)shiptipy, (int)rightcornerx, (int)rightcornery);
 			grap.drawLine((int)shiptipx, (int)shiptipy, (int)leftcornerx, (int)leftcornery);
 			grap.drawLine((int)shipx, (int)shipy, (int)rightcornerx, (int)rightcornery);
