@@ -25,6 +25,8 @@ public class Asteroids {
 	Color[] colors = {Color.RED,Color.GREEN,Color.BLUE,Color.WHITE,Color.ORANGE,Color.PINK,Color.MAGENTA,Color.CYAN,Color.YELLOW,Color.DARK_GRAY};
 	Random colorpicker = new Random();
 	
+	ArrayList<List<Double>> afterimage =  new ArrayList<List<Double>>();
+	
 	double shipx = 200;
 	double shipy = 200;
 	double angle = 180;
@@ -35,6 +37,10 @@ public class Asteroids {
 	double shipxaccel;
 	double shipyaccel;
 	
+	double aftershipx;
+	double aftershipy;
+	double afterangle;
+	
 	double rightcornerx;
 	double rightcornery;
 	double leftcornerx;
@@ -42,6 +48,8 @@ public class Asteroids {
 	double shiptipx;
 	double shiptipy;
 	double bulletspeed = 90;
+	
+	float HSB[] = new float[3];
 	
 	int angletoshipcorner=130;
 	
@@ -76,20 +84,24 @@ public class Asteroids {
 			shipdx+=0.08*Math.sin(angle * Math.PI / 180);
 			shipdy+=0.08*Math.cos(angle * Math.PI / 180);
 		}
-		if (pressedkeys[3]==1){
+		if (pressedkeys[0]==1||pressedkeys[1]==1||pressedkeys[2]==1)
 			bullets.add(Arrays.asList(shipx,shipy,angle,(double)colorpicker.nextInt(10)));
-		}
 		for (int i=0;i<bullets.size();i++){
 			bullets.get(i).set(0,bullets.get(i).get(0)+bulletspeed*Math.sin(bullets.get(i).get(2))* Math.PI / 180);
 			bullets.get(i).set(1,bullets.get(i).get(1)+bulletspeed*Math.cos(bullets.get(i).get(2))* Math.PI / 180);
 		}
-		//grap.fillRect(5,5,985,955);
 		shipx+=shipdx;
 		shipy+=shipdy;
 		
-		shipdx-=shipdx/100;
-		shipdy-=shipdy/100;
-
+		// Drag coefficient
+		/*shipdx-=shipdx/200;
+		shipdy-=shipdy/200;*/
+		
+		if (afterimage.size()>255){
+			afterimage.remove(0);
+			afterimage.add(Arrays.asList(shipx,shipy,angle));
+		}
+		else afterimage.add(Arrays.asList(shipx,shipy,angle));
 		if (shipx<5){
 			shipx=990;
 		}
@@ -103,7 +115,7 @@ public class Asteroids {
 			shipy=5;
 		}
 		
-		try{Thread.sleep(10);}
+		try{Thread.sleep(2);}
 		catch(Exception e){System.out.println("UH OH!");}
 		window.repaint();
 	}}
@@ -119,9 +131,6 @@ public class Asteroids {
 			if (key.getKeyCode()==KeyEvent.VK_UP){
 				pressedkeys[2] = 1;
 			}
-			if (key.getKeyCode()==KeyEvent.VK_SPACE){
-				pressedkeys[3] = 1;
-			}
 		}
 		public void keyReleased(KeyEvent key) {
 			if (key.getKeyCode()==KeyEvent.VK_LEFT){
@@ -132,10 +141,7 @@ public class Asteroids {
 			}
 			if (key.getKeyCode()==KeyEvent.VK_UP){
 				pressedkeys[2]=0;
-			}
-			if (key.getKeyCode()==KeyEvent.VK_SPACE){
-				pressedkeys[3]=0;
-			}			
+			}		
 		}
 		public void keyTyped(KeyEvent key) {}
 		
@@ -148,8 +154,6 @@ public class Asteroids {
 			grap.fillRect(0, 0, 1050, 1050);
 			grap.setColor(Color.BLACK);
 			grap.fillRect(5,5,985,955);
-			
-			grap.setColor(Color.WHITE);
 			rightcornerx = (shipx + 20 * Math.sin((angle-angletoshipcorner) * Math.PI / 180));
 			rightcornery = (shipy + 20 * Math.cos((angle-angletoshipcorner) * Math.PI / 180 ));
 			
@@ -167,6 +171,48 @@ public class Asteroids {
 			grap.drawLine((int)shiptipx, (int)shiptipy, (int)leftcornerx, (int)leftcornery);
 			grap.drawLine((int)shipx, (int)shipy, (int)rightcornerx, (int)rightcornery);
 			grap.drawLine((int)shipx, (int)shipy, (int)leftcornerx, (int)leftcornery);
+			for (int i=0;i<afterimage.size();i++){
+				aftershipx=afterimage.get(i).get(0);
+				aftershipy=afterimage.get(i).get(1);
+				afterangle=afterimage.get(i).get(2);
+				
+				rightcornerx = (aftershipx + 20 * Math.sin((afterangle-angletoshipcorner) * Math.PI / 180));
+				rightcornery = (aftershipy + 20 * Math.cos((afterangle-angletoshipcorner) * Math.PI / 180 ));
+				
+				leftcornerx = (aftershipx + 20 * Math.sin((afterangle+angletoshipcorner) * Math.PI / 180));
+				leftcornery= (aftershipy + 20 * Math.cos((afterangle+angletoshipcorner) * Math.PI / 180 ));
+				
+				shiptipx = (aftershipx + 10 * Math.sin(afterangle * Math.PI / 180));
+				shiptipy = (aftershipy + 10 * Math.cos(afterangle * Math.PI / 180 ));
+				
+				if (i<=50){
+					HSB = Color.RGBtoHSB(255, (i%50)*5+1, 0, null);
+				}
+				else if (i<100){
+					HSB = Color.RGBtoHSB((50-(i%50))*5+1, 255, 0, null);
+				}
+				else if (i<=150){
+					HSB = Color.RGBtoHSB(0, 255, (i%50)*5+1, null);
+				}
+				else if (i<=200){
+					HSB = Color.RGBtoHSB(0, (50-(i%50))*5+1, 255, null);
+				}
+				else
+					HSB = Color.RGBtoHSB((i%50)*5+1, 0, 255, null);
+				
+				// WHITE TO BLACK FADE
+				//HSB = Color.RGBtoHSB(i+1,i+1,i+1,null);
+				
+				// ???
+				//grap.setColor(Color.getHSBColor(i, i, i));
+				
+				grap.setColor(Color.getHSBColor(HSB[0],HSB[1],HSB[2]));
+				
+				grap.drawLine((int)shiptipx, (int)shiptipy, (int)rightcornerx, (int)rightcornery);
+				grap.drawLine((int)shiptipx, (int)shiptipy, (int)leftcornerx, (int)leftcornery);
+				grap.drawLine((int)aftershipx, (int)aftershipy, (int)rightcornerx, (int)rightcornery);
+				grap.drawLine((int)aftershipx, (int)aftershipy, (int)leftcornerx, (int)leftcornery);
+			}
 
 		}
 		
