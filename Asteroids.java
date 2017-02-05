@@ -6,6 +6,7 @@ package Asteroids;
 // rotate the ship and the up arrow to move the ship forwards. THIS IS NOW A FIREWORK MAKING GAME
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -26,6 +27,8 @@ public class Asteroids {
 	Random colorpicker = new Random();
 	
 	ArrayList<List<Double>> afterimage =  new ArrayList<List<Double>>();
+	
+	boolean drag = true;
 	
 	double shipx = 200;
 	double shipy = 200;
@@ -48,6 +51,8 @@ public class Asteroids {
 	double shiptipx;
 	double shiptipy;
 	double bulletspeed = 90;
+	
+	boolean instructions=true;
 	
 	float HSB[] = new float[3];
 	
@@ -75,10 +80,10 @@ public class Asteroids {
 	private void playgame(){
 		while(true){
 		if (pressedkeys[0]==1){
-			angle+=5;
+			angle+=3;
 		}
 		if (pressedkeys[1]==1){
-			angle-=5;
+			angle-=3;
 		}
 		if (pressedkeys[2]==1){
 			shipdx+=0.08*Math.sin(angle * Math.PI / 180);
@@ -94,9 +99,10 @@ public class Asteroids {
 		shipy+=shipdy;
 		
 		// Drag coefficient
-		/*shipdx-=shipdx/200;
-		shipdy-=shipdy/200;*/
-		
+		if (drag){
+		shipdx-=shipdx/200;
+		shipdy-=shipdy/200;
+		}
 		if (afterimage.size()>255){
 			afterimage.remove(0);
 			afterimage.add(Arrays.asList(shipx,shipy,angle));
@@ -115,13 +121,14 @@ public class Asteroids {
 			shipy=5;
 		}
 		
-		try{Thread.sleep(2);}
+		try{Thread.sleep(1);}
 		catch(Exception e){System.out.println("UH OH!");}
 		window.repaint();
 	}}
 	
 	private class keyevents implements KeyListener{
 		public void keyPressed(KeyEvent key) {
+			instructions = false;
 			if (key.getKeyCode()==KeyEvent.VK_LEFT){
 				pressedkeys[0]=1;
 			}
@@ -130,6 +137,10 @@ public class Asteroids {
 			}
 			if (key.getKeyCode()==KeyEvent.VK_UP){
 				pressedkeys[2] = 1;
+			}
+			if (key.getKeyCode()==KeyEvent.VK_D){
+				if (drag)drag=false;
+				else drag=true;
 			}
 		}
 		public void keyReleased(KeyEvent key) {
@@ -167,6 +178,10 @@ public class Asteroids {
 				grap.fillRect(bullets.get(i).get(0).intValue(), bullets.get(i).get(1).intValue(), 5, 5);
 			}
 			grap.setColor(Color.WHITE);
+			if (instructions){
+				grap.setFont(new Font("serif", Font.BOLD, 20));
+				grap.drawString("Use the arrow keys to move! Press 'D' to toggle whether there is drag", 200, 50);
+			}
 			grap.drawLine((int)shiptipx, (int)shiptipy, (int)rightcornerx, (int)rightcornery);
 			grap.drawLine((int)shiptipx, (int)shiptipy, (int)leftcornerx, (int)leftcornery);
 			grap.drawLine((int)shipx, (int)shipy, (int)rightcornerx, (int)rightcornery);
